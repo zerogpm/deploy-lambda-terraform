@@ -3,7 +3,7 @@ import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3";
 
 // Use the region from environment variable set by Terraform
 const s3Client = new S3Client({ 
-    region: process.env.AWS_REGION || 'us-east-1' // Fallback included just in case
+    region: process.env.CUSTOM_AWS_REGION || 'us-east-1'  // Changed to use CUSTOM_AWS_REGION
 });
 
 export const handler = async (event, context) => {
