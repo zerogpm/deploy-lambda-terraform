@@ -31,7 +31,7 @@ jobs:
           role-to-assume: arn:aws:iam::541356534908:role/GithubActionRole
           aws-region: us-east-1
 
-      - name: Delete existing Lambda function
+      - name: Delete existing Lambda function.
         continue-on-error: true
         run: |
           aws lambda delete-function --function-name deploy-lambda-terraform_function
