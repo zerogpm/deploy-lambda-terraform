@@ -76,4 +76,10 @@ resource "aws_lambda_function" "s3_list_buckets_lambda" {
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   runtime         = "nodejs18.x"
   timeout         = 10
+
+  environment {
+    variables = {
+      AWS_REGION = var.aws_region  # Explicitly set the region
+    }
+  }
 }

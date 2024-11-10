@@ -1,13 +1,13 @@
-# .github/workflows/deploy.yml
+# deploy-lambda-terraform/.github/workflows/deploy.yml
 name: 'Deploy Lambda'
 
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/GithubActionRole  # Replace with your role ARN
+          role-to-assume: arn:aws:iam::123456789012:role/GithubActionRole  # Replace with your AWS role ARN
           aws-region: us-east-1
 
       - name: Setup Terraform
