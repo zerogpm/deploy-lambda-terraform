@@ -21,7 +21,7 @@ export const handler = async (event, context) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: {  // Remove JSON.stringify here
+            body: {  // Remove JSON.stringify here.
                 buckets: buckets,
                 count: buckets.length
             }
