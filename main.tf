@@ -79,7 +79,7 @@ resource "aws_lambda_function" "list_buckets_lambda" {
 
   environment {
     variables = {
-      CUSTOM_AWS_REGION = var.aws_region  # Changed from AWS_REGION to CUSTOM_AWS_REGION
+      CUSTOM_AWS_REGION = var.aws_region  # Changed from AWS_REGION to CUSTOM_AWS_REGIONS
     }
   }
 }
