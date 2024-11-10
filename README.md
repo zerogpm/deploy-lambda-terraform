@@ -367,6 +367,61 @@ aws lambda invoke \
 - The Lambda function lists all S3 buckets in your AWS account.
 - The GitHub Actions workflow deploys on pushes to main and can be manually triggered.
 
+
+## Cleanup Instructions
+
+To clean up all resources and avoid unwanted AWS charges, follow these steps:
+
+### 1. Terraform Resources Cleanup
+Delete all resources created by Terraform (Lambda function, IAM roles, etc.):
+```bash
+terraform destroy -auto-approve
+```
+
+### 2. Manual OIDC Cleanup
+Remove the OIDC and IAM resources we created with AWS CLI:
+
+```bash
+# 1. Remove the IAM role policy
+aws iam remove-role-policy \
+    --role-name GithubActionRole \
+    --policy-name GithubActionPolicy
+
+# 2. Delete the IAM role
+aws iam delete-role \
+    --role-name GithubActionRole
+
+# 3. List OIDC providers to get the ARN
+aws iam list-open-id-connect-providers
+
+# 4. Delete the OIDC provider
+aws iam delete-open-id-connect-provider \
+    --open-id-connect-provider-arn arn:aws:iam::541356534908:oidc-provider/token.actions.githubusercontent.com
+```
+
+### Verify Cleanup
+You can verify that all resources have been deleted:
+
+```bash
+# Check OIDC providers
+aws iam list-open-id-connect-providers
+# Should return empty list: {"OpenIDConnectProviderList": []}
+
+# Check if role exists
+aws iam get-role --role-name GithubActionRole
+# Should return error indicating role doesn't exist
+
+# Check Lambda function
+aws lambda get-function --function-name deploy-lambda-terraform_function
+# Should return error indicating function doesn't exist
+```
+
+### Important Notes
+- Always clean up resources when you're done to avoid unnecessary AWS charges
+- Make sure to delete resources in the correct order to handle dependencies
+- If you get any errors about resources being in use, check the AWS Console for any remaining dependencies
+- The GitHub repository and local files are not affected by this cleanup
+
 ## License
 
 MIT
