@@ -1,11 +1,11 @@
-# main.tf
+# deploy-lambda-terraform/main.tf
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 # IAM Role
 resource "aws_iam_role" "lambda_role" {
-  name = "s3_list_buckets_role"
+  name = "${var.project_name}_lambda_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -23,7 +23,7 @@ resource "aws_iam_role" "lambda_role" {
 
 # S3 List Buckets permission
 resource "aws_iam_role_policy" "s3_policy" {
-  name = "s3_list_buckets_policy"
+  name = "${var.project_name}_s3_policy"
   role = aws_iam_role.lambda_role.id
 
   policy = jsonencode({
@@ -50,7 +50,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}/src"
-  output_path = "${path.module}/lambda_function.zip"
+  output_path = "${path.module}/${var.project_name}.zip"
 
   depends_on = [null_resource.npm_install]
 }
@@ -68,9 +68,9 @@ resource "null_resource" "npm_install" {
 }
 
 # Lambda Function
-resource "aws_lambda_function" "s3_list_buckets_lambda" {
+resource "aws_lambda_function" "list_buckets_lambda" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = var.lambda_function_name
+  function_name    = "${var.project_name}_function"
   role            = aws_iam_role.lambda_role.arn
   handler         = "index.handler"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
@@ -79,7 +79,7 @@ resource "aws_lambda_function" "s3_list_buckets_lambda" {
 
   environment {
     variables = {
-      AWS_REGION = var.aws_region  # Explicitly set the region
+      AWS_REGION = var.aws_region
     }
   }
 }
