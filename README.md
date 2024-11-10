@@ -416,6 +416,15 @@ aws lambda get-function --function-name deploy-lambda-terraform_function
 # Should return error indicating function doesn't exist
 ```
 
+```bash
+
+aws iam delete-role-policy --role-name deploy-lambda-terraform_lambda_role --policy-name deploy-lambda-terraform_s3_policy
+
+aws iam detach-role-policy --role-name deploy-lambda-terraform_lambda_role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+aws iam delete-role --role-name deploy-lambda-terraform_lambda_role
+```
+
 ### Important Notes
 - Always clean up resources when you're done to avoid unnecessary AWS charges
 - Make sure to delete resources in the correct order to handle dependencies
