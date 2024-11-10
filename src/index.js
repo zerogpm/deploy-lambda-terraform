@@ -1,9 +1,8 @@
 // src/index.js
 import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3";
 
-// Use the region from environment variable set by Terraform
 const s3Client = new S3Client({ 
-    region: process.env.CUSTOM_AWS_REGION || 'us-east-1'  // Changed to use CUSTOM_AWS_REGION
+    region: process.env.CUSTOM_AWS_REGION || 'us-east-1'
 });
 
 export const handler = async (event, context) => {
@@ -16,24 +15,25 @@ export const handler = async (event, context) => {
             creationDate: bucket.CreationDate
         }));
 
+        // Return response without stringifying the body
         return {
             statusCode: 200,
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            body: {  // Remove JSON.stringify here
                 buckets: buckets,
                 count: buckets.length
-            }, null, 2)
+            }
         };
 
     } catch (error) {
         console.error('Error:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({
+            body: {  // Remove JSON.stringify here
                 error: error.message
-            })
+            }
         };
     }
 };
