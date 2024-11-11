@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.github/workflows/**'  # Keep this to ignore workflow file changes
+      - 'README.md'            # Also good to ignore documentation changes  
   pull_request:
     branches:
       - master

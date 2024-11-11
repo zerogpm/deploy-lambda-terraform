@@ -1,0 +1,65 @@
+# .github/workflows/cleanup.yml
+name: 'Cleanup Resources'
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::541356534908:role/GithubActionRole
+          aws-region: us-east-1
+
+      - name: Cleanup All Resources
+        run: |
+          # Delete CloudWatch Log Group
+          echo "Deleting CloudWatch Log Group..."
+          aws logs delete-log-group --log-group-name "/aws/lambda/deploy-lambda-terraform_function" || true
+          
+          # Delete Lambda function
+          echo "Deleting Lambda function..."
+          aws lambda delete-function --function-name deploy-lambda-terraform_function || true
+          
+          # Remove role policies
+          echo "Removing Lambda role policies..."
+          aws iam delete-role-policy --role-name deploy-lambda-terraform_lambda_role --policy-name deploy-lambda-terraform_s3_policy || true
+          aws iam detach-role-policy --role-name deploy-lambda-terraform_lambda_role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole || true
+          
+          # Delete Lambda IAM role
+          echo "Deleting Lambda IAM role..."
+          aws iam delete-role --role-name deploy-lambda-terraform_lambda_role || true
+          
+          echo "Cleanup completed!"
+
+      - name: Verify Cleanup
+        run: |
+          echo "Verifying all resources are deleted..."
+          
+          # Check CloudWatch Log Group
+          if aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/deploy-lambda-terraform_function" --query 'logGroups[*].[logGroupName]' --output text; then
+            echo "Warning: CloudWatch Log Group might still exist"
+          else
+            echo "CloudWatch Log Group deleted successfully"
+          fi
+          
+          # Check Lambda Function
+          if aws lambda get-function --function-name deploy-lambda-terraform_function 2>/dev/null; then
+            echo "Warning: Lambda function might still exist"
+          else
+            echo "Lambda function deleted successfully"
+          fi
+          
+          # Check IAM Role
+          if aws iam get-role --role-name deploy-lambda-terraform_lambda_role 2>/dev/null; then
+            echo "Warning: IAM role might still exist"
+          else
+            echo "IAM role deleted successfully"
+          fi
