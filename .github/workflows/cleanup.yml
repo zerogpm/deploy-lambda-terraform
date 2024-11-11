@@ -39,15 +39,21 @@ jobs:
           
           echo "Cleanup completed!"
 
+      # In cleanup.yml
       - name: Verify Cleanup
         run: |
           echo "Verifying all resources are deleted..."
           
-          # Check CloudWatch Log Group
-          if aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/deploy-lambda-terraform_function" --query 'logGroups[*].[logGroupName]' --output text; then
-            echo "Warning: CloudWatch Log Group might still exist"
-          else
+          # Check CloudWatch Log Group - Fixed Logic
+          LOG_GROUPS=$(aws logs describe-log-groups \
+            --log-group-name-prefix "/aws/lambda/deploy-lambda-terraform_function" \
+            --query 'logGroups[*].[logGroupName]' \
+            --output text)
+          
+          if [ -z "$LOG_GROUPS" ]; then
             echo "CloudWatch Log Group deleted successfully"
+          else
+            echo "Warning: CloudWatch Log Group still exists: $LOG_GROUPS"
           fi
           
           # Check Lambda Function
