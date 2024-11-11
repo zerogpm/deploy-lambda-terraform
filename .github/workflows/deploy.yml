@@ -31,10 +31,21 @@ jobs:
           role-to-assume: arn:aws:iam::541356534908:role/GithubActionRole
           aws-region: us-east-1
 
-      - name: Delete existing Lambda function.
+      - name: Cleanup existing resources
         continue-on-error: true
         run: |
-          aws lambda delete-function --function-name deploy-lambda-terraform_function
+          # Delete Lambda function
+          aws lambda delete-function --function-name deploy-lambda-terraform_function || true
+          
+          # Remove role policies
+          aws iam delete-role-policy --role-name deploy-lambda-terraform_lambda_role --policy-name deploy-lambda-terraform_s3_policy || true
+          aws iam detach-role-policy --role-name deploy-lambda-terraform_lambda_role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole || true
+          
+          # Delete IAM role
+          aws iam delete-role --role-name deploy-lambda-terraform_lambda_role || true
+          
+          # Wait a few seconds for AWS to complete deletions
+          sleep 10
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
